@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import { addLabels, listIssuesFromRepo } from "./tools.js";
+import { addLabels, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 
 
@@ -61,6 +61,25 @@ server.registerTool(
     }
    
 );
+
+
+//Tool: Weekly Digest
+server.registerTool(
+    "weekly_digest",
+    {
+        title: "Weekly Digest",
+        description:
+            "Get an itemized summary of repository activity from the last 7 days (issues/PRs updated + commits)",
+        inputSchema: {
+            owner: z.string(),
+            repo: z.string(),
+        },
+    },
+    async ({ owner, repo }) => {
+      return await getWeeklyDigest({ owner, repo });
+    },
+);
+
 
 
 
