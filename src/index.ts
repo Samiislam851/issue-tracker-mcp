@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import { addComment, addLabels, createIssue, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
+import { addComment, addLabels, closeIssue, createIssue, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -110,6 +110,27 @@ server.registerTool(
     },
     async ({ owner, repo, title, body, labels, assignees, milestone }) => {
         return await createIssue({ owner, repo, title, body, labels, assignees, milestone });
+    },
+);
+
+// Tool: Close Issue
+server.registerTool(
+    "close_issue",
+    {
+        title: "Close Issue",
+        description: "Close a GitHub issue in a repository",
+        inputSchema: {
+            owner: z.string().describe("Repository owner"),
+            repo: z.string().describe("Repository name"),
+            issue_number: z.number().describe("Issue number to close"),
+            state_reason: z
+                .enum(["completed", "not_planned"])
+                .optional()
+                .describe("Optional reason for closing the issue"),
+        },
+    },
+    async ({ owner, repo, issue_number, state_reason }) => {
+        return await closeIssue({ owner, repo, issue_number, state_reason });
     },
 );
 

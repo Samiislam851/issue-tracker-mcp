@@ -205,3 +205,37 @@ export const createIssue = async ({
         structuredContent: output,
     };
 };
+
+export const closeIssue = async ({
+    owner,
+    repo,
+    issue_number,
+    state_reason,
+}: {
+    owner: string;
+    repo: string;
+    issue_number: number;
+    state_reason?: "completed" | "not_planned";
+}) => {
+    const octokit = getOctokit();
+    const { data: issue } = await octokit.issues.update({
+        owner,
+        repo,
+        issue_number,
+        state: "closed",
+        ...(state_reason ? { state_reason } : {}),
+    });
+
+    const output = {
+        number: issue.number,
+        title: issue.title,
+        state: issue.state,
+        state_reason: (issue as unknown as { state_reason?: string | null }).state_reason ?? null,
+        url: issue.html_url,
+    };
+
+    return {
+        content: [{ type: "text" as const, text: `Closed issue #${output.number}: ${output.title}` }],
+        structuredContent: output,
+    };
+};
