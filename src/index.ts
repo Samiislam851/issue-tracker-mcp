@@ -6,14 +6,7 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import { addComment, addLabels, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
-
-
-// ============================================================================
-// Dev Logging Utilities
-// ============================================================================
-
 const isDev = process.env.NODE_ENV !== "production";
-
 
 // ============================================================================
 // MCP Server Setup
@@ -24,7 +17,7 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
-// 1. Tool: View Issue List
+// Tool: View Issue List
 server.registerTool(
     "list_issues",
     {
@@ -44,7 +37,7 @@ server.registerTool(
     }
 );
 
-// 2. Tool: Issue Triage
+//  Tool: Issue Triage
 server.registerTool(
     "triage_issue",
     {
@@ -63,7 +56,7 @@ server.registerTool(
 );
 
 
-//Tool: Weekly Digest
+// Tool: Weekly Digest
 server.registerTool(
     "weekly_digest",
     {
@@ -80,7 +73,7 @@ server.registerTool(
     },
 );
 
-
+// Tool: Add Comment
 server.registerTool(
       "add_comment",
     { 
@@ -114,12 +107,6 @@ app.get("/health", (_req: Request, res: Response) => {
 
 // MCP endpoint with dev logging
 app.post("/mcp", async (req: Request, res: Response) => {
-  const startTime = Date.now();
-  const body = req.body;
-
-  // Extract method and params from JSON-RPC request
-  const method = body?.method || "unknown";
-  const params = body?.params;
 
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
