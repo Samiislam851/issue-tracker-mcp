@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import { addLabels, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
+import { addComment, addLabels, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 
 
@@ -81,6 +81,23 @@ server.registerTool(
 );
 
 
+server.registerTool(
+      "add_comment",
+    { 
+        title: "Add Comment",
+        description:"Post a comment on a GitHub issue or pull request",
+        inputSchema:{
+          owner : z.string(),
+          repo: z.string(),
+          issue_Number: z.number(),
+          body: z.string().describe("the body of the comment")
+        }
+    },
+    async ({owner, repo, issue_Number, body})=>{
+      return await addComment({owner, repo, issue_Number, body});
+    }
+
+)
 
 
 // ============================================================================

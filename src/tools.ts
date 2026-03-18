@@ -151,3 +151,16 @@ export const addLabels = async ({ owner, repo, issue_number }:{owner: string; re
             structuredContent: output,
         };
     }
+
+    export const addComment = async ({ owner, repo, issue_Number, body }: { owner: string; repo: string; issue_Number: number; body: string }) =>{
+      const octokit = getOctokit();
+      await octokit.issues.createComment({ owner, repo, issue_number: issue_Number, body });
+        const output = {
+            status: "success",
+            message: `Comment added to #${issue_Number}`,
+        };
+        return {
+            content: [{ type: "text" as const, text: output.message }],
+            structuredContent: output,
+        };
+    }
