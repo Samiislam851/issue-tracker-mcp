@@ -5,24 +5,33 @@
  * This separation makes tools easy to unit test without MCP infrastructure.
  */
 
-export interface HelloResult {
-  [key: string]: unknown;
-  message: string;
-}
+import { Octokit } from "@octokit/rest";
 
-export function hello(name: string): HelloResult {
-  return { message: `Hello, ${name}! Welcome to MCP.` };
-}
+let cached: Octokit | null = null; // cache the octokit instance to avoid creating a new one for each request
+const getOctokit = () => {
+    if (!cached) {
+        cached = new Octokit({
+            auth: process.env.GITHUB_TOKEN,
+        });
+    }
+    return cached;
+};
 
-export interface EchoResult {
-  [key: string]: unknown;
-  echo: string;
-  timestamp: string;
-}
-
-export function echo(text: string): EchoResult {
-  return {
-    echo: text,
-    timestamp: new Date().toISOString(),
-  };
+export async function listIssuesFromRepo({ owner, repo, state }: { owner: string; repo: string; state: "open" | "closed" | "all"; }) {
+    const octokit = getOctokit();
+    const { data: issues } = await octokit.issues.listForRepo({
+        owner,
+        repo,
+        state: state as "open" | "closed" | "all",
+        per_page: 10,
+    });
+    const list = issues
+        .filter((i) => !i.pull_request)
+        .map((i) => `#${i.number}: ${i.title}`)
+        .join("\n");
+    const output = { issues: list || "No issues found." };
+    return {
+        content: [{ type: "text" as const, text: output.issues }],
+        structuredContent: output,
+    };
 }

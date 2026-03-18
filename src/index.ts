@@ -3,8 +3,8 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
-import { Octokit } from "@octokit/rest";
 import dotenv from "dotenv";
+import { listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 
 
@@ -13,11 +13,7 @@ dotenv.config();
 // ============================================================================
 
 const isDev = process.env.NODE_ENV !== "production";
-console.log('the github token is', process.env.GITHUB_TOKEN);
 
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN, // personal access token
-});
 
 // ============================================================================
 // MCP Server Setup
@@ -44,22 +40,8 @@ server.registerTool(
         },
     },
     async ({ owner, repo, state }) => {
-        const { data: issues } = await octokit.issues.listForRepo({
-            owner,
-            repo,
-            state,
-            per_page: 10,
-        });
-        const list = issues
-            .filter((i) => !i.pull_request)
-            .map((i) => `#${i.number}: ${i.title}`)
-            .join("\n");
-        const output = { issues: list || "No issues found." };
-        return {
-            content: [{ type: "text", text: output.issues }],
-            structuredContent: output,
-        };
-    },
+        return await listIssuesFromRepo({ owner, repo, state });
+    }
 );
 
 
