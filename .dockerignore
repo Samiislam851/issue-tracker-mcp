@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.vscode
+.cursor
+.mcpize
+.env
+.env.*
+*.md
+*.log
+.DS_Store
+scripts
