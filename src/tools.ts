@@ -164,3 +164,44 @@ export const addLabels = async ({ owner, repo, issue_number }:{owner: string; re
             structuredContent: output,
         };
     }
+
+export const createIssue = async ({
+    owner,
+    repo,
+    title,
+    body,
+    labels,
+    assignees,
+    milestone,
+}: {
+    owner: string;
+    repo: string;
+    title: string;
+    body?: string;
+    labels?: string[];
+    assignees?: string[];
+    milestone?: number;
+}) => {
+    const octokit = getOctokit();
+    const { data: issue } = await octokit.issues.create({
+        owner,
+        repo,
+        title,
+        body,
+        labels,
+        assignees,
+        milestone,
+    });
+
+    const output = {
+        number: issue.number,
+        title: issue.title,
+        state: issue.state,
+        url: issue.html_url,
+    };
+
+    return {
+        content: [{ type: "text" as const, text: `Created issue #${output.number}: ${output.title}` }],
+        structuredContent: output,
+    };
+};

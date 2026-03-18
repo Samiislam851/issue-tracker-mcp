@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import { addComment, addLabels, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
+import { addComment, addLabels, createIssue, getWeeklyDigest, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -90,7 +90,28 @@ server.registerTool(
       return await addComment({owner, repo, issue_Number, body});
     }
 
-)
+);
+
+// Tool: Create Issue
+server.registerTool(
+    "create_issue",
+    {
+        title: "Create Issue",
+        description: "Create a new issue in a GitHub repository",
+        inputSchema: {
+            owner: z.string().describe("Repository owner"),
+            repo: z.string().describe("Repository name"),
+            title: z.string().describe("Issue title"),
+            body: z.string().optional().describe("Issue body (markdown)"),
+            labels: z.array(z.string()).optional().describe("Labels to apply"),
+            assignees: z.array(z.string()).optional().describe("Users to assign"),
+            milestone: z.number().optional().describe("Milestone number"),
+        },
+    },
+    async ({ owner, repo, title, body, labels, assignees, milestone }) => {
+        return await createIssue({ owner, repo, title, body, labels, assignees, milestone });
+    },
+);
 
 
 // ============================================================================
