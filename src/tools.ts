@@ -17,7 +17,7 @@ const getOctokit = () => {
     return cached;
 };
 
-export async function listIssuesFromRepo({ owner, repo, state }: { owner: string; repo: string; state: "open" | "closed" | "all"; }) {
+export const  listIssuesFromRepo = async({ owner, repo, state }: { owner: string; repo: string; state: "open" | "closed" | "all"; }) => {
     const octokit = getOctokit();
     const { data: issues } = await octokit.issues.listForRepo({
         owner,
@@ -35,3 +35,31 @@ export async function listIssuesFromRepo({ owner, repo, state }: { owner: string
         structuredContent: output,
     };
 }
+
+export const addLabels = async ({ owner, repo, issue_number }:{owner: string; repo: string; issue_number : number}) => {
+        const octokit = getOctokit();
+        const { data: issue } = await octokit.issues.get({
+            owner,
+            repo,
+            issue_number,
+        });
+        const label = (issue.title + (issue.body || ""))
+            .toLowerCase()
+            .includes("bug") ? "bug" : "enhancement";
+            
+        await octokit.issues.addLabels({
+            owner,
+            repo,
+            issue_number,
+            labels: [label],
+        });
+
+        const output = {
+            message: `Issue #${issue_number} labeled as: ${label}`,
+            label,
+        };
+        return {
+            content: [{ type: "text" as const, text: output.message }],
+            structuredContent: output,
+        };
+    }

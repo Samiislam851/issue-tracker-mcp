@@ -4,7 +4,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import { listIssuesFromRepo } from "./tools.js";
+import { addLabels, listIssuesFromRepo } from "./tools.js";
 dotenv.config();
 
 
@@ -42,6 +42,24 @@ server.registerTool(
     async ({ owner, repo, state }) => {
         return await listIssuesFromRepo({ owner, repo, state });
     }
+);
+
+// 2. Tool: Issue Triage
+server.registerTool(
+    "triage_issue",
+    {
+        title: "Triage Issue",
+        description: "Automatically label an issue such as 'bug' or 'enhancement'",
+        inputSchema: {
+            owner: z.string(),
+            repo: z.string(),
+            issue_number: z.number().describe("The issue number to triage"),
+        },
+    },
+    async ({owner, repo, issue_number}) =>{
+      return await addLabels({owner, repo, issue_number});
+    }
+   
 );
 
 
