@@ -32,21 +32,6 @@ npm test        # Run tests
 npm start       # Run compiled server
 ```
 
-## Project Structure
-
-```
-├── src/
-│   ├── index.ts        # MCP server entry point (tool registration + HTTP)
-│   └── tools.ts        # Pure GitHub tool functions (testable)
-├── tests/
-│   └── tools.test.ts   # Tool unit tests
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-├── mcpize.yaml         # MCPize deployment manifest
-├── Dockerfile          # Container build
-└── .env.example        # Environment variables template
-```
-
 ## Tools
 
 All tools take a repository as **`owner`** / **`repo`** (GitHub `owner/name`).
@@ -62,12 +47,6 @@ All tools take a repository as **`owner`** / **`repo`** (GitHub `owner/name`).
 
 Handlers return both human-readable `content` and `structuredContent` for clients that support structured tool results.
 
-## Testing
-
-```bash
-npm test                                  # Run unit tests
-npx @anthropic-ai/mcp-inspector          # Interactive MCP testing
-```
 
 For the inspector, connect to `http://localhost:8080/mcp` (or your deployed URL).
 
