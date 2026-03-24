@@ -2,16 +2,26 @@
 
 [![MCPize](https://mcpize.com/badge/@mcpize/mcpize?type=hosted)](https://mcpize.com)
 
-MCP server created with [MCPize](https://mcpize.com).
+An MCP (Model Context Protocol) server that talks to the [GitHub REST API](https://docs.github.com/en/rest) so assistants can list, triage, create, comment on, and close issues, and pull a weekly-style activity digest for a repository. Built with [MCPize](https://mcpize.com), Express, and [`@octokit/rest`](https://github.com/octokit/octokit.js).
+
+## Configuration
+
+Create a `.env` file (see `.env.example` for `PORT` / `NODE_ENV`). **Required for GitHub API calls:**
+
+- **`GITHUB_TOKEN`** — A [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with scopes appropriate for the repos you use (for example `repo` for private repositories, or `public_repo` for public-only usage).
+
+The server reads `GITHUB_TOKEN` at startup via `dotenv`.
 
 ## Quick Start
 
 ```bash
 npm install
+# Set GITHUB_TOKEN in .env, then:
 npm run dev     # Start with hot reload
 ```
 
-Server runs at `http://localhost:8080/mcp`
+- **MCP (Streamable HTTP):** `POST http://localhost:8080/mcp` (default port from `PORT`, usually `8080`)
+- **Health:** `GET http://localhost:8080/health` — JSON `{ "status": "healthy" }` (useful for platforms like Cloud Run)
 
 ## Development
 
@@ -26,8 +36,8 @@ npm start       # Run compiled server
 
 ```
 ├── src/
-│   ├── index.ts        # MCP server entry point
-│   └── tools.ts        # Pure tool functions (testable)
+│   ├── index.ts        # MCP server entry point (tool registration + HTTP)
+│   └── tools.ts        # Pure GitHub tool functions (testable)
 ├── tests/
 │   └── tools.test.ts   # Tool unit tests
 ├── package.json        # Dependencies and scripts
@@ -39,8 +49,18 @@ npm start       # Run compiled server
 
 ## Tools
 
-- **hello** — Returns a greeting message
-- **echo** — Echoes back the input with a timestamp
+All tools take a repository as **`owner`** / **`repo`** (GitHub `owner/name`).
+
+| Tool | Purpose |
+|------|--------|
+| **`list_issues`** | Lists up to 10 **issues** (pull requests excluded) with optional `state`: `open`, `closed`, or `all`. |
+| **`triage_issue`** | Fetches an issue and adds a single label: `bug` if “bug” appears in the title or body (case-insensitive), otherwise `enhancement`. |
+| **`weekly_digest`** | Summarizes the last 7 days: issues updated, PRs updated, and commits (text summary plus structured counts and lists). |
+| **`add_comment`** | Posts a comment on an issue or PR (`issue_Number`, `body`). |
+| **`create_issue`** | Opens a new issue with optional `body`, `labels`, `assignees`, and `milestone`. |
+| **`close_issue`** | Closes an issue; optional `state_reason`: `completed` or `not_planned`. |
+
+Handlers return both human-readable `content` and `structuredContent` for clients that support structured tool results.
 
 ## Testing
 
@@ -49,7 +69,7 @@ npm test                                  # Run unit tests
 npx @anthropic-ai/mcp-inspector          # Interactive MCP testing
 ```
 
-Connect to `http://localhost:8080/mcp` to test tools interactively.
+For the inspector, connect to `http://localhost:8080/mcp` (or your deployed URL).
 
 ## Deployment
 
@@ -57,6 +77,6 @@ Connect to `http://localhost:8080/mcp` to test tools interactively.
 mcpize deploy
 ```
 
-## License
+Configure **`GITHUB_TOKEN`** (and any other secrets) in your MCPize dashboard or host environment so the server can authenticate to GitHub.
 
-MIT
+
